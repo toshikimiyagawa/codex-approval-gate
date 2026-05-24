@@ -8,3 +8,7 @@
 - If a document starts in one language, add the translated counterpart before considering the documentation change complete.
 - Do not leave canonical documentation directly under `docs/` except for the `en/` and `ja/` language roots.
 
+## Pull Requests
+
+- Write pull request descriptions in Japanese.
+- Keep PR descriptions concise and include a summary plus the test plan.
