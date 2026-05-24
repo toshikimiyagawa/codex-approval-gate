@@ -16,3 +16,11 @@
 - Use small commits inside a PR for reviewable steps, but keep the PR as the unit that answers "what does this enable?"
 - Split PRs when changes have different review concerns, different rollback needs, or unrelated risk profiles.
 - For larger feature work, write or update a short spec/plan before implementation and keep tasks in that plan small enough to verify independently.
+
+## Plan Checkboxes
+
+- Use plan checkboxes when a spec/plan exists for a feature-sized change.
+- Mark a task checkbox when that task's implementation and verification are complete, not only at the end of the whole PR.
+- Update checkboxes before pausing, handing off, opening a PR, or reporting that a planned task is complete.
+- For small changes without a plan, do not create checkbox-only process overhead; summarize completed work and verification in the PR description instead.
+- If a plan is intentionally not kept in sync, note that in the PR description so unfinished checkboxes are not ambiguous.
