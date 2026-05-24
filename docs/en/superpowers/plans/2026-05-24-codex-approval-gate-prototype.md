@@ -1,6 +1,6 @@
 # codex-approval-gate Prototype Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build the first Go CLI prototype for `codex-approval-gate codex`.
 
@@ -33,21 +33,21 @@
 - Create: `internal/adapters/codex/codex_test.go`
 - Create: `internal/adapters/codex/testdata/permission_request.json`
 
-- [ ] **Step 1: Write failing adapter tests**
+- [x] **Step 1: Write failing adapter tests**
 
 Test that fixture input decodes, default response emits Codex hook output, and simple mode emits `{"decision":"ask"}`.
 
-- [ ] **Step 2: Run adapter tests and verify RED**
+- [x] **Step 2: Run adapter tests and verify RED**
 
 Run: `go test ./internal/adapters/codex`
 
 Expected: FAIL because the module and package do not exist yet.
 
-- [ ] **Step 3: Implement minimal adapter**
+- [x] **Step 3: Implement minimal adapter**
 
 Create `go.mod`, decode JSON into raw maps plus summary fields, and encode `allow` / `deny` / `ask`.
 
-- [ ] **Step 4: Run adapter tests and verify GREEN**
+- [x] **Step 4: Run adapter tests and verify GREEN**
 
 Run: `go test ./internal/adapters/codex`
 
@@ -59,21 +59,21 @@ Expected: PASS.
 - Create: `internal/config/config.go`
 - Create: `internal/config/config_test.go`
 
-- [ ] **Step 1: Write failing config tests**
+- [x] **Step 1: Write failing config tests**
 
 Test valid TOML, missing provider fields, default `codex` output mode, and timeout parsing.
 
-- [ ] **Step 2: Run config tests and verify RED**
+- [x] **Step 2: Run config tests and verify RED**
 
 Run: `go test ./internal/config`
 
 Expected: FAIL because config package is missing.
 
-- [ ] **Step 3: Implement config loader**
+- [x] **Step 3: Implement config loader**
 
 Use `github.com/BurntSushi/toml`, require provider type/base URL/model, default timeout to 10 seconds, and default output mode to `codex`.
 
-- [ ] **Step 4: Run config tests and verify GREEN**
+- [x] **Step 4: Run config tests and verify GREEN**
 
 Run: `go test ./internal/config`
 
@@ -85,21 +85,21 @@ Expected: PASS.
 - Create: `internal/judge/judge.go`
 - Create: `internal/judge/judge_test.go`
 
-- [ ] **Step 1: Write failing judge tests**
+- [x] **Step 1: Write failing judge tests**
 
 Test provider `allow`, provider error, malformed provider output, and unknown decision normalization.
 
-- [ ] **Step 2: Run judge tests and verify RED**
+- [x] **Step 2: Run judge tests and verify RED**
 
 Run: `go test ./internal/judge`
 
 Expected: FAIL because judge package is missing.
 
-- [ ] **Step 3: Implement minimal judge**
+- [x] **Step 3: Implement minimal judge**
 
 Define request/response types, provider interface, prompt construction, and fail-to-`ask` normalization.
 
-- [ ] **Step 4: Run judge tests and verify GREEN**
+- [x] **Step 4: Run judge tests and verify GREEN**
 
 Run: `go test ./internal/judge`
 
@@ -111,21 +111,21 @@ Expected: PASS.
 - Create: `internal/providers/openai/client.go`
 - Create: `internal/providers/openai/client_test.go`
 
-- [ ] **Step 1: Write failing provider tests**
+- [x] **Step 1: Write failing provider tests**
 
 Use `httptest` to verify request path, model, authorization header, parsed JSON decision, and non-2xx error.
 
-- [ ] **Step 2: Run provider tests and verify RED**
+- [x] **Step 2: Run provider tests and verify RED**
 
 Run: `go test ./internal/providers/openai`
 
 Expected: FAIL because provider package is missing.
 
-- [ ] **Step 3: Implement minimal client**
+- [x] **Step 3: Implement minimal client**
 
 POST to `/v1/chat/completions`, send model/messages, parse the first choice message content as judge JSON, and return errors for HTTP/provider failures.
 
-- [ ] **Step 4: Run provider tests and verify GREEN**
+- [x] **Step 4: Run provider tests and verify GREEN**
 
 Run: `go test ./internal/providers/openai`
 
@@ -137,21 +137,21 @@ Expected: PASS.
 - Create: `internal/audit/audit.go`
 - Create: `internal/audit/audit_test.go`
 
-- [ ] **Step 1: Write failing audit tests**
+- [x] **Step 1: Write failing audit tests**
 
 Test disabled audit does nothing, enabled audit writes one JSONL record, and raw input is included only when configured.
 
-- [ ] **Step 2: Run audit tests and verify RED**
+- [x] **Step 2: Run audit tests and verify RED**
 
 Run: `go test ./internal/audit`
 
 Expected: FAIL because audit package is missing.
 
-- [ ] **Step 3: Implement audit writer**
+- [x] **Step 3: Implement audit writer**
 
 Append one JSON object per decision, include timestamp, decision, reason, provider/model, summary, raw input hash, and optional raw input.
 
-- [ ] **Step 4: Run audit tests and verify GREEN**
+- [x] **Step 4: Run audit tests and verify GREEN**
 
 Run: `go test ./internal/audit`
 
@@ -168,31 +168,31 @@ Expected: PASS.
 - Create: `docs/en/codex-hook.md`
 - Create: `docs/ja/codex-hook.md`
 
-- [ ] **Step 1: Write failing CLI integration tests**
+- [x] **Step 1: Write failing CLI integration tests**
 
 Use temporary config, fixture stdin, and `httptest` provider. Test allow output, provider error fallback to ask, simple output mode, and audit write.
 
-- [ ] **Step 2: Run CLI tests and verify RED**
+- [x] **Step 2: Run CLI tests and verify RED**
 
 Run: `go test ./cmd/codex-approval-gate`
 
 Expected: FAIL because CLI wiring is missing.
 
-- [ ] **Step 3: Implement CLI wiring**
+- [x] **Step 3: Implement CLI wiring**
 
 Parse `codex --config`, load config, read stdin, call provider through judge, write audit, and encode response to stdout. If audit writing fails, output `ask`.
 
-- [ ] **Step 4: Add examples and bilingual docs**
+- [x] **Step 4: Add examples and bilingual docs**
 
 Add example config, hook fixture, README quickstart, and matching English/Japanese hook docs.
 
-- [ ] **Step 5: Run full verification**
+- [x] **Step 5: Run full verification**
 
 Run: `go test ./...`
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 Run:
 
@@ -201,3 +201,6 @@ git add .
 git commit -m "Implement initial codex approval gate prototype"
 ```
 
+## Completion Note
+
+This prototype plan has been implemented and merged. The initial vertical slice landed in PR #1, and follow-up PRs added CI, config discovery, setup documentation, and configurable policy patterns.
