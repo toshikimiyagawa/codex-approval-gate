@@ -1,0 +1,7 @@
+{
+  "hook_event_name": "PermissionRequest",
+  "tool_name": "shell",
+  "cwd": "/tmp/project",
+  "command": "git status --short",
+  "reason": "Inspect working tree"
+}
