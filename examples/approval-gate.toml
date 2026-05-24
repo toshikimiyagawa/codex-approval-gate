@@ -1,0 +1,13 @@
+[provider]
+type = "openai"
+base_url = "http://localhost:1234"
+model = "local-model"
+api_key_env = ""
+timeout = "10s"
+
+[codex]
+output_mode = "codex"
+
+[audit]
+path = "./audit.jsonl"
+include_raw_input = false
