@@ -9,6 +9,7 @@ codex-approval-gate codex --config approval-gate.toml
 ```
 
 The `--config` flag is required in the prototype.
+If omitted, the CLI looks for `./approval-gate.toml` and then `codex-approval-gate/config.toml` under the OS user config directory.
 
 ## Decisions
 

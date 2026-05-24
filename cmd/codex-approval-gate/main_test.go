@@ -51,6 +51,55 @@ func TestRunCodexFallsBackToAskOnProviderError(t *testing.T) {
 	}
 }
 
+func TestRunCodexDiscoversLocalConfigWhenConfigFlagOmitted(t *testing.T) {
+	server := providerServer(t, `{"decision":"allow","reason":"local config"}`, http.StatusOK)
+	defer server.Close()
+	tmpDir := t.TempDir()
+	writeCLIConfigAt(t, filepath.Join(tmpDir, "approval-gate.toml"), server.URL, "simple", "")
+	originalWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(originalWD); err != nil {
+			t.Fatal(err)
+		}
+	})
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout bytes.Buffer
+	code := run([]string{"codex"}, strings.NewReader(hookInput), &stdout, &bytes.Buffer{})
+
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0", code)
+	}
+	if strings.TrimSpace(stdout.String()) != `{"decision":"allow"}` {
+		t.Fatalf("stdout = %q, want simple allow", stdout.String())
+	}
+}
+
+func TestResolveConfigPathDiscoversUserConfigDir(t *testing.T) {
+	configHome := t.TempDir()
+	t.Setenv("CODEX_APPROVAL_GATE_CONFIG_HOME", configHome)
+	configPath := filepath.Join(configHome, "codex-approval-gate", "config.toml")
+	if err := os.MkdirAll(filepath.Dir(configPath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(configPath, []byte(""), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := resolveConfigPath("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != configPath {
+		t.Fatalf("config path = %q, want %q", got, configPath)
+	}
+}
+
 func TestRunCodexWritesAuditRecord(t *testing.T) {
 	server := providerServer(t, `{"decision":"deny","reason":"dangerous"}`, http.StatusOK)
 	defer server.Close()
@@ -132,6 +181,13 @@ func writeCLIConfig(t *testing.T, baseURL string, outputMode string, auditPath s
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "approval-gate.toml")
+	writeCLIConfigAt(t, path, baseURL, outputMode, auditPath)
+	return path
+}
+
+func writeCLIConfigAt(t *testing.T, path string, baseURL string, outputMode string, auditPath string) {
+	t.Helper()
+
 	contents := `[provider]
 type = "openai"
 base_url = "` + baseURL + `"
@@ -147,7 +203,6 @@ path = "` + auditPath + `"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	return path
 }
 
 func strconvQuote(value string) string {

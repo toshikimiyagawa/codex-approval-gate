@@ -8,7 +8,7 @@
 codex-approval-gate codex --config approval-gate.toml
 ```
 
-プロトタイプでは `--config` flag が必須。
+`--config` flag を省略した場合、CLI は `./approval-gate.toml`、次に OS user config directory 配下の `codex-approval-gate/config.toml` を探す。
 
 ## Decision
 
