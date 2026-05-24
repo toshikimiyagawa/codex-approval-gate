@@ -21,6 +21,8 @@ go run ./cmd/codex-approval-gate codex --config examples/approval-gate.toml < ex
 ## Documentation
 
 - English: [docs/en/codex-hook.md](docs/en/codex-hook.md)
+- English policy: [docs/en/policy.md](docs/en/policy.md)
 - English smoke test: [docs/en/smoke-test.md](docs/en/smoke-test.md)
 - Japanese: [docs/ja/codex-hook.md](docs/ja/codex-hook.md)
+- Japanese policy: [docs/ja/policy.md](docs/ja/policy.md)
 - Japanese smoke test: [docs/ja/smoke-test.md](docs/ja/smoke-test.md)

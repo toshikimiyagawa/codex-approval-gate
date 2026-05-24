@@ -13,12 +13,14 @@ const (
 )
 
 type Request struct {
-	ToolName string         `json:"tool_name,omitempty"`
-	Command  string         `json:"command,omitempty"`
-	CWD      string         `json:"cwd,omitempty"`
-	Reason   string         `json:"reason,omitempty"`
-	Raw      []byte         `json:"-"`
-	Fields   map[string]any `json:"fields,omitempty"`
+	ToolName      string         `json:"tool_name,omitempty"`
+	Command       string         `json:"command,omitempty"`
+	CWD           string         `json:"cwd,omitempty"`
+	Reason        string         `json:"reason,omitempty"`
+	PolicyVerdict string         `json:"policy_verdict,omitempty"`
+	PolicyReasons []string       `json:"policy_reasons,omitempty"`
+	Raw           []byte         `json:"-"`
+	Fields        map[string]any `json:"fields,omitempty"`
 }
 
 type Result struct {
@@ -86,11 +88,13 @@ func systemPrompt() string {
 }
 
 func userPrompt(req Request) string {
-	payload := map[string]string{
-		"tool_name": req.ToolName,
-		"command":   req.Command,
-		"cwd":       req.CWD,
-		"reason":    req.Reason,
+	payload := map[string]any{
+		"tool_name":      req.ToolName,
+		"command":        req.Command,
+		"cwd":            req.CWD,
+		"reason":         req.Reason,
+		"policy_verdict": req.PolicyVerdict,
+		"policy_reasons": req.PolicyReasons,
 	}
 	encoded, err := json.Marshal(payload)
 	if err != nil {

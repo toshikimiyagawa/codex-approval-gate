@@ -11,6 +11,7 @@ import (
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/audit"
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/config"
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/judge"
+	"github.com/toshikimiyagawa/codex-approval-gate/internal/policy"
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/providers/openai"
 )
 
@@ -65,13 +66,20 @@ func runCodex(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer
 		APIKey:  apiKey(cfg.Provider.APIKeyEnv),
 		Timeout: cfg.Provider.Timeout,
 	})
-	result := judge.New(provider).Decide(context.Background(), judge.Request{
+	policyResult := policy.Evaluate(policy.Request{
 		ToolName: permissionReq.ToolName,
 		Command:  permissionReq.Command,
 		CWD:      permissionReq.CWD,
-		Reason:   permissionReq.Reason,
-		Raw:      permissionReq.Raw,
-		Fields:   permissionReq.Fields,
+	})
+	result := judge.New(provider).Decide(context.Background(), judge.Request{
+		ToolName:      permissionReq.ToolName,
+		Command:       permissionReq.Command,
+		CWD:           permissionReq.CWD,
+		Reason:        permissionReq.Reason,
+		PolicyVerdict: policyResult.Verdict,
+		PolicyReasons: policyResult.Reasons,
+		Raw:           permissionReq.Raw,
+		Fields:        permissionReq.Fields,
 	})
 
 	auditWriter := audit.New(audit.Config{
