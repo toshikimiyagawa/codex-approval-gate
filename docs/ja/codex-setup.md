@@ -30,6 +30,11 @@ output_mode = "codex"
 [audit]
 path = "./audit.jsonl"
 include_raw_input = false
+
+[policy]
+read_only_prefixes = []
+risky_prefixes = []
+risky_substrings = []
 ```
 
 endpoint は `POST /v1/chat/completions` に対応している必要がある。first choice message content は次のような JSON にする。

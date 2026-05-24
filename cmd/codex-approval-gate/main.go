@@ -68,10 +68,14 @@ func runCodex(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer
 		APIKey:  apiKey(cfg.Provider.APIKeyEnv),
 		Timeout: cfg.Provider.Timeout,
 	})
-	policyResult := policy.Evaluate(policy.Request{
+	policyResult := policy.EvaluateWithConfig(policy.Request{
 		ToolName: permissionReq.ToolName,
 		Command:  permissionReq.Command,
 		CWD:      permissionReq.CWD,
+	}, policy.Config{
+		ReadOnlyPrefixes: cfg.Policy.ReadOnlyPrefixes,
+		RiskyPrefixes:    cfg.Policy.RiskyPrefixes,
+		RiskySubstrings:  cfg.Policy.RiskySubstrings,
 	})
 	result := judge.New(provider).Decide(context.Background(), judge.Request{
 		ToolName:      permissionReq.ToolName,

@@ -29,3 +29,16 @@ risky の例:
 - `>` を使う shell redirection
 
 policy は意図的に conservative にする。unknown command は provider に委ね、provider failure 時は従来通り `ask` に fallback する。
+
+## Config
+
+built-in pattern は引き続き有効。local pattern は TOML で追加する。
+
+```toml
+[policy]
+read_only_prefixes = ["go test"]
+risky_prefixes = ["docker system prune"]
+risky_substrings = ["| pbcopy"]
+```
+
+configured risky pattern は read-only pattern より先に評価する。これにより、破壊的な local override が safe として扱われることを避ける。

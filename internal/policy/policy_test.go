@@ -45,3 +45,35 @@ func TestEvaluateMarksUnknownCommandsUnknown(t *testing.T) {
 		t.Fatalf("verdict = %q, want %q", result.Verdict, VerdictUnknown)
 	}
 }
+
+func TestEvaluateWithConfigAddsReadOnlyPrefixes(t *testing.T) {
+	result := EvaluateWithConfig(Request{ToolName: "shell", Command: "go test ./..."}, Config{
+		ReadOnlyPrefixes: []string{"go test"},
+	})
+	if result.Verdict != VerdictSafe {
+		t.Fatalf("verdict = %q, want %q; reasons: %v", result.Verdict, VerdictSafe, result.Reasons)
+	}
+}
+
+func TestEvaluateWithConfigAddsRiskyPrefixesAndSubstrings(t *testing.T) {
+	for _, command := range []string{"docker system prune", "echo token | pbcopy"} {
+		t.Run(command, func(t *testing.T) {
+			result := EvaluateWithConfig(Request{ToolName: "shell", Command: command}, Config{
+				RiskyPrefixes:   []string{"docker system prune"},
+				RiskySubstrings: []string{"| pbcopy"},
+			})
+			if result.Verdict != VerdictRisky {
+				t.Fatalf("verdict = %q, want %q; reasons: %v", result.Verdict, VerdictRisky, result.Reasons)
+			}
+		})
+	}
+}
+
+func TestEvaluateWithConfigKeepsRiskyBeforeReadOnly(t *testing.T) {
+	result := EvaluateWithConfig(Request{ToolName: "shell", Command: "rm -rf /tmp/build"}, Config{
+		ReadOnlyPrefixes: []string{"rm"},
+	})
+	if result.Verdict != VerdictRisky {
+		t.Fatalf("verdict = %q, want %q", result.Verdict, VerdictRisky)
+	}
+}

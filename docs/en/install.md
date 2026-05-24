@@ -48,6 +48,11 @@ output_mode = "codex"
 [audit]
 path = "./audit.jsonl"
 include_raw_input = false
+
+[policy]
+read_only_prefixes = []
+risky_prefixes = []
+risky_substrings = []
 ```
 
 Use `api_key_env` when your local OpenAI-compatible endpoint requires a token.
