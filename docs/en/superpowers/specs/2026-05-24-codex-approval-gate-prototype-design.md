@@ -33,7 +33,10 @@ examples/
   codex/hooks.json
   approval-gate.toml
 docs/
-  codex-hook.md
+  en/
+    codex-hook.md
+  ja/
+    codex-hook.md
 ```
 
 The package boundaries are intentionally small:
