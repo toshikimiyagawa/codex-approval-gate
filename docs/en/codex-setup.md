@@ -30,6 +30,11 @@ output_mode = "codex"
 [audit]
 path = "./audit.jsonl"
 include_raw_input = false
+
+[policy]
+read_only_prefixes = []
+risky_prefixes = []
+risky_substrings = []
 ```
 
 The endpoint must support `POST /v1/chat/completions`. The first choice message content must be JSON:

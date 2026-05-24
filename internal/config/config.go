@@ -12,6 +12,7 @@ type Config struct {
 	Provider ProviderConfig
 	Codex    CodexConfig
 	Audit    AuditConfig
+	Policy   PolicyConfig
 }
 
 type ProviderConfig struct {
@@ -31,6 +32,12 @@ type AuditConfig struct {
 	IncludeRawInput bool
 }
 
+type PolicyConfig struct {
+	ReadOnlyPrefixes []string
+	RiskyPrefixes    []string
+	RiskySubstrings  []string
+}
+
 type fileConfig struct {
 	Provider struct {
 		Type      string `toml:"type"`
@@ -46,6 +53,11 @@ type fileConfig struct {
 		Path            string `toml:"path"`
 		IncludeRawInput bool   `toml:"include_raw_input"`
 	} `toml:"audit"`
+	Policy struct {
+		ReadOnlyPrefixes []string `toml:"read_only_prefixes"`
+		RiskyPrefixes    []string `toml:"risky_prefixes"`
+		RiskySubstrings  []string `toml:"risky_substrings"`
+	} `toml:"policy"`
 }
 
 func Load(path string) (Config, error) {
@@ -77,6 +89,11 @@ func Load(path string) (Config, error) {
 		Audit: AuditConfig{
 			Path:            raw.Audit.Path,
 			IncludeRawInput: raw.Audit.IncludeRawInput,
+		},
+		Policy: PolicyConfig{
+			ReadOnlyPrefixes: raw.Policy.ReadOnlyPrefixes,
+			RiskyPrefixes:    raw.Policy.RiskyPrefixes,
+			RiskySubstrings:  raw.Policy.RiskySubstrings,
 		},
 	}
 	if cfg.Codex.OutputMode == "" {

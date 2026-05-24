@@ -11,3 +11,8 @@ output_mode = "codex"
 [audit]
 path = "./audit.jsonl"
 include_raw_input = false
+
+[policy]
+read_only_prefixes = []
+risky_prefixes = []
+risky_substrings = []

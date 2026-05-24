@@ -47,6 +47,11 @@ output_mode = "simple"
 [audit]
 path = "./audit.jsonl"
 include_raw_input = true
+
+[policy]
+read_only_prefixes = ["go test"]
+risky_prefixes = ["docker system prune"]
+risky_substrings = ["| pbcopy"]
 `)
 
 	cfg, err := Load(path)
@@ -68,6 +73,15 @@ include_raw_input = true
 	}
 	if !cfg.Audit.IncludeRawInput {
 		t.Fatal("include raw input = false, want true")
+	}
+	if got := cfg.Policy.ReadOnlyPrefixes; len(got) != 1 || got[0] != "go test" {
+		t.Fatalf("read_only_prefixes = %v, want [go test]", got)
+	}
+	if got := cfg.Policy.RiskyPrefixes; len(got) != 1 || got[0] != "docker system prune" {
+		t.Fatalf("risky_prefixes = %v, want [docker system prune]", got)
+	}
+	if got := cfg.Policy.RiskySubstrings; len(got) != 1 || got[0] != "| pbcopy" {
+		t.Fatalf("risky_substrings = %v, want [| pbcopy]", got)
 	}
 }
 

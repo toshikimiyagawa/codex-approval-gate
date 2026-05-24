@@ -29,3 +29,16 @@ Risky examples:
 - shell redirection with `>`
 
 The policy is intentionally conservative. Unknown commands are left to the provider and still fall back to `ask` on failure.
+
+## Config
+
+The built-in patterns remain enabled. Add local patterns in TOML:
+
+```toml
+[policy]
+read_only_prefixes = ["go test"]
+risky_prefixes = ["docker system prune"]
+risky_substrings = ["| pbcopy"]
+```
+
+Configured risky patterns are evaluated before read-only patterns. This keeps destructive local overrides from being treated as safe.

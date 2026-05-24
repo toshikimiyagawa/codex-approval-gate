@@ -160,6 +160,48 @@ func TestRunCodexIncludesPolicyPrecheckInProviderPrompt(t *testing.T) {
 	}
 }
 
+func TestRunCodexUsesConfiguredPolicyPrecheck(t *testing.T) {
+	var userPrompt string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			Messages []messageForTest `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		for _, message := range body.Messages {
+			if message.Role == "user" {
+				userPrompt = message.Content
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"decision\":\"ask\"}"}}]}`))
+	}))
+	defer server.Close()
+	cfg := writeCLIConfigWithPolicy(t, server.URL, "simple", "", `
+[policy]
+risky_prefixes = ["go test"]
+`)
+
+	var stdout bytes.Buffer
+	code := run([]string{"codex", "--config", cfg}, strings.NewReader(`{
+  "hook_event_name": "PermissionRequest",
+  "tool_name": "shell",
+  "cwd": "/tmp/project",
+  "command": "go test ./..."
+}`), &stdout, &bytes.Buffer{})
+
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0", code)
+	}
+	if !strings.Contains(userPrompt, `"policy_verdict":"risky"`) {
+		t.Fatalf("user prompt = %s, want risky policy verdict", userPrompt)
+	}
+	if !strings.Contains(userPrompt, "matches configured risky prefix go test") {
+		t.Fatalf("user prompt = %s, want configured policy reason", userPrompt)
+	}
+}
+
 func providerServer(t *testing.T, content string, status int) *httptest.Server {
 	t.Helper()
 
@@ -188,6 +230,20 @@ func writeCLIConfig(t *testing.T, baseURL string, outputMode string, auditPath s
 func writeCLIConfigAt(t *testing.T, path string, baseURL string, outputMode string, auditPath string) {
 	t.Helper()
 
+	writeCLIConfigWithPolicyAt(t, path, baseURL, outputMode, auditPath, "")
+}
+
+func writeCLIConfigWithPolicy(t *testing.T, baseURL string, outputMode string, auditPath string, policyConfig string) string {
+	t.Helper()
+
+	path := filepath.Join(t.TempDir(), "approval-gate.toml")
+	writeCLIConfigWithPolicyAt(t, path, baseURL, outputMode, auditPath, policyConfig)
+	return path
+}
+
+func writeCLIConfigWithPolicyAt(t *testing.T, path string, baseURL string, outputMode string, auditPath string, policyConfig string) {
+	t.Helper()
+
 	contents := `[provider]
 type = "openai"
 base_url = "` + baseURL + `"
@@ -199,7 +255,7 @@ output_mode = "` + outputMode + `"
 
 [audit]
 path = "` + auditPath + `"
-`
+` + policyConfig
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
