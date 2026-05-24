@@ -72,6 +72,45 @@ func TestRunCodexWritesAuditRecord(t *testing.T) {
 	}
 }
 
+func TestRunCodexIncludesPolicyPrecheckInProviderPrompt(t *testing.T) {
+	var userPrompt string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			Messages []messageForTest `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		for _, message := range body.Messages {
+			if message.Role == "user" {
+				userPrompt = message.Content
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"decision\":\"ask\"}"}}]}`))
+	}))
+	defer server.Close()
+	cfg := writeCLIConfig(t, server.URL, "simple", "")
+
+	var stdout bytes.Buffer
+	code := run([]string{"codex", "--config", cfg}, strings.NewReader(`{
+  "hook_event_name": "PermissionRequest",
+  "tool_name": "shell",
+  "cwd": "/tmp/project",
+  "command": "rm -rf /tmp/build"
+}`), &stdout, &bytes.Buffer{})
+
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0", code)
+	}
+	if !strings.Contains(userPrompt, `"policy_verdict":"risky"`) {
+		t.Fatalf("user prompt = %s, want risky policy verdict", userPrompt)
+	}
+	if !strings.Contains(userPrompt, "starts with risky command rm") {
+		t.Fatalf("user prompt = %s, want risky policy reason", userPrompt)
+	}
+}
+
 func providerServer(t *testing.T, content string, status int) *httptest.Server {
 	t.Helper()
 
@@ -114,6 +153,11 @@ path = "` + auditPath + `"
 func strconvQuote(value string) string {
 	encoded, _ := json.Marshal(value)
 	return string(encoded)
+}
+
+type messageForTest struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 const hookInput = `{

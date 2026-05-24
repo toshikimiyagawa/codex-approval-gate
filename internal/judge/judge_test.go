@@ -3,6 +3,7 @@ package judge
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 )
 
@@ -61,6 +62,25 @@ func TestJudgeBuildsPromptFromRequest(t *testing.T) {
 	}
 	if provider.request.UserPrompt == "" {
 		t.Fatal("user prompt was empty")
+	}
+}
+
+func TestJudgeIncludesPolicyResultInPrompt(t *testing.T) {
+	provider := &recordingProvider{response: ProviderResponse{Decision: "ask"}}
+	j := New(provider)
+
+	j.Decide(context.Background(), Request{
+		ToolName:      "shell",
+		Command:       "rm -rf /tmp/build",
+		PolicyVerdict: "risky",
+		PolicyReasons: []string{"starts with risky command rm"},
+	})
+
+	if !strings.Contains(provider.request.UserPrompt, `"policy_verdict":"risky"`) {
+		t.Fatalf("user prompt = %s, want policy verdict", provider.request.UserPrompt)
+	}
+	if !strings.Contains(provider.request.UserPrompt, "starts with risky command rm") {
+		t.Fatalf("user prompt = %s, want policy reason", provider.request.UserPrompt)
 	}
 }
 
