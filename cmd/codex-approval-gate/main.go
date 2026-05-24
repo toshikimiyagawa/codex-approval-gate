@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/adapters/codex"
 	"github.com/toshikimiyagawa/codex-approval-gate/internal/audit"
@@ -41,12 +42,13 @@ func runCodex(args []string, stdin io.Reader, stdout io.Writer, stderr io.Writer
 	if err := flags.Parse(args); err != nil {
 		return 2
 	}
-	if *configPath == "" {
-		_, _ = fmt.Fprintln(stderr, "--config is required")
+	resolvedConfigPath, err := resolveConfigPath(*configPath)
+	if err != nil {
+		_, _ = fmt.Fprintln(stderr, err)
 		return 2
 	}
 
-	cfg, err := config.Load(*configPath)
+	cfg, err := config.Load(resolvedConfigPath)
 	if err != nil {
 		return writeFallback(stdout, codex.OutputModeCodex)
 	}
@@ -124,4 +126,35 @@ func apiKey(envName string) string {
 		return ""
 	}
 	return os.Getenv(envName)
+}
+
+func resolveConfigPath(explicitPath string) (string, error) {
+	if explicitPath != "" {
+		return explicitPath, nil
+	}
+	for _, path := range defaultConfigPaths() {
+		if _, err := os.Stat(path); err == nil {
+			return path, nil
+		}
+	}
+	return "", fmt.Errorf("no config found; pass --config or create %s", "approval-gate.toml")
+}
+
+func defaultConfigPaths() []string {
+	paths := []string{"approval-gate.toml"}
+	if configDir := configHome(); configDir != "" {
+		paths = append(paths, filepath.Join(configDir, "codex-approval-gate", "config.toml"))
+	}
+	return paths
+}
+
+func configHome() string {
+	if configDir := os.Getenv("CODEX_APPROVAL_GATE_CONFIG_HOME"); configDir != "" {
+		return configDir
+	}
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return ""
+	}
+	return configDir
 }

@@ -10,6 +10,8 @@ codex-approval-gate codex --config examples/approval-gate.toml
 
 stdin から Codex hook JSON を読み取り、stdout に approval response を出力します。有効な decision は `allow`、`deny`、`ask` です。provider failure、invalid provider output、ambiguous decision は必ず `ask` を返します。
 
+`--config` を省略した場合、CLI は `./approval-gate.toml`、次に OS の user config path 配下の `codex-approval-gate/config.toml` を探します。
+
 ## 試す
 
 ```sh

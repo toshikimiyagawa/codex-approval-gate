@@ -12,6 +12,8 @@ codex-approval-gate codex --config examples/approval-gate.toml
 
 It reads Codex hook JSON from stdin and writes an approval response to stdout. Valid decisions are `allow`, `deny`, and `ask`. Provider failures, invalid provider output, and ambiguous decisions always return `ask`.
 
+If `--config` is omitted, the CLI looks for `./approval-gate.toml` and then the OS user config path `codex-approval-gate/config.toml`.
+
 ## Try It
 
 ```sh
