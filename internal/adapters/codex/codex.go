@@ -26,13 +26,29 @@ func DecodePermissionRequest(input []byte) (PermissionRequest, error) {
 		return PermissionRequest{}, err
 	}
 
+	tool := mapField(fields, "tool")
+	toolInput := mapField(tool, "input", "arguments", "args")
+	if len(toolInput) == 0 {
+		toolInput = mapField(fields, "tool_input", "toolInput", "input", "arguments", "args")
+	}
+
 	return PermissionRequest{
-		ToolName: stringField(fields, "tool_name", "toolName", "tool"),
-		Command:  stringField(fields, "command", "cmd"),
-		CWD:      stringField(fields, "cwd", "current_working_directory"),
-		Reason:   stringField(fields, "reason"),
-		Raw:      append([]byte(nil), input...),
-		Fields:   fields,
+		ToolName: firstString(
+			stringField(fields, "tool_name", "toolName"),
+			stringField(tool, "name", "tool_name", "toolName"),
+			stringField(fields, "tool"),
+		),
+		Command: firstString(
+			stringField(fields, "command", "cmd"),
+			stringField(toolInput, "command", "cmd"),
+		),
+		CWD: firstString(
+			stringField(fields, "cwd", "current_working_directory"),
+			stringField(toolInput, "cwd", "current_working_directory"),
+		),
+		Reason: stringField(fields, "reason"),
+		Raw:    append([]byte(nil), input...),
+		Fields: fields,
 	}, nil
 }
 
@@ -76,6 +92,25 @@ func stringField(fields map[string]any, names ...string) string {
 	for _, name := range names {
 		value, ok := fields[name].(string)
 		if ok {
+			return value
+		}
+	}
+	return ""
+}
+
+func mapField(fields map[string]any, names ...string) map[string]any {
+	for _, name := range names {
+		value, ok := fields[name].(map[string]any)
+		if ok {
+			return value
+		}
+	}
+	return nil
+}
+
+func firstString(values ...string) string {
+	for _, value := range values {
+		if value != "" {
 			return value
 		}
 	}

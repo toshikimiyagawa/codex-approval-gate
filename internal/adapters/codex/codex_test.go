@@ -31,6 +31,28 @@ func TestDecodePermissionRequestExtractsSummaryAndRawInput(t *testing.T) {
 	}
 }
 
+func TestDecodePermissionRequestExtractsNestedToolInput(t *testing.T) {
+	input, err := os.ReadFile("testdata/permission_request_nested.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, err := DecodePermissionRequest(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if req.ToolName != "shell" {
+		t.Fatalf("ToolName = %q, want shell", req.ToolName)
+	}
+	if req.Command != "git diff -- README.md" {
+		t.Fatalf("Command = %q, want git diff -- README.md", req.Command)
+	}
+	if req.CWD != "/tmp/project" {
+		t.Fatalf("CWD = %q, want /tmp/project", req.CWD)
+	}
+}
+
 func TestEncodeResponseDefaultsToCodexHookFormat(t *testing.T) {
 	got, err := EncodeResponse("allow", OutputModeCodex)
 	if err != nil {
