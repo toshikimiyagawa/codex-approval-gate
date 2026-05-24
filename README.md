@@ -1,5 +1,7 @@
 # codex-approval-gate
 
+[日本語 README](README.ja.md)
+
 `codex-approval-gate` is a small Go CLI prototype for routing Codex `PermissionRequest` hooks through an OpenAI-compatible local LLM approval gate.
 
 The first command is:
@@ -21,4 +23,6 @@ The configured provider must expose an OpenAI-compatible `/v1/chat/completions` 
 ## Documentation
 
 - English: [docs/en/codex-hook.md](docs/en/codex-hook.md)
+- English smoke test: [docs/en/smoke-test.md](docs/en/smoke-test.md)
 - Japanese: [docs/ja/codex-hook.md](docs/ja/codex-hook.md)
+- Japanese smoke test: [docs/ja/smoke-test.md](docs/ja/smoke-test.md)

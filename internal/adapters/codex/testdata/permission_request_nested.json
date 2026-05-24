@@ -1,0 +1,11 @@
+{
+  "hookEventName": "PermissionRequest",
+  "tool": {
+    "name": "shell",
+    "input": {
+      "command": "git diff -- README.md",
+      "cwd": "/tmp/project"
+    }
+  },
+  "reason": "Inspect documentation changes"
+}
